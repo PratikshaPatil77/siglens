@@ -17,7 +17,7 @@ limitations under the License.
 'use strict';
 
 let currentPanel;
-let selectedChartTypeIndex = -1, selectedDataSourceTypeIndex = -1;
+let selectedChartTypeIndex = -1, selectedDataSourceTypeIndex = 1;
 let selectedUnitTypeIndex = -1;
 let selectedDataTypeIndex = -1;
 let prevSelectedDataTypeIndex = -2;
@@ -1041,14 +1041,17 @@ function updatePanelDescr() {
 }
 
 function refreshDataSourceMenuOptions() {
-	let dataSourceTypeMenuItems = $('.editPanelMenu-dataSource .editPanelMenu-options');
-	dataSourceTypeMenuItems.each(function (index, item) {
-		item.classList.remove("selected");
-	})
-	dataSourceTypeMenuItems[selectedDataSourceTypeIndex].classList.add("selected");
-	let dataSource = mapIndexToDataSourceType.get(selectedDataSourceTypeIndex);
-	dataSource = dataSource.charAt(0).toUpperCase() + dataSource.slice(1);
-	$('.dropDown-dataSource span').html(dataSource);
+    let dataSourceTypeMenuItems = $('.editPanelMenu-dataSource .editPanelMenu-options');
+    dataSourceTypeMenuItems.removeClass("selected");
+
+    let logsOption = dataSourceTypeMenuItems.filter('[data-index="1"]');
+    logsOption.addClass("selected");
+
+    let dataSource = mapIndexToDataSourceType.get(1); 
+    dataSource = dataSource.charAt(0).toUpperCase() + dataSource.slice(1);
+    $('.dropDown-dataSource span').html(dataSource);
+    
+    handleSourceDropDownClick();
 }
 
 function refreshChartMenuOptions() {
@@ -1220,7 +1223,7 @@ function resetPanelTimeRanges() {
 
 function resetEditPanelScreen() {
 	resetEditPanel();
-	$('.dropDown-dataSource span').html("Data Source")
+	$('.dropDown-dataSource span').html("Logs")
 	$('.dropDown-chart span').html("Chart Type")
 	$('.dropDown-unit span').html("Unit")
 	$('.dropDown-logLinesView span').html("Single line display view")
@@ -1230,15 +1233,20 @@ function resetEditPanelScreen() {
 	$('.query-language-option').removeClass('active');
 	$('#query-language-btn span').html('Splunk QL');
 	$('#query-language-options #option-3').addClass('active');
+	handleSourceDropDownClick();
 }
 
 function resetEditPanel() {
+	$('.dropDown-dataSource span').html("Logs");
+	$('.editPanelMenu-dataSource .editPanelMenu-options.selected').removeClass('selected');
+	$('.editPanelMenu-dataSource .editPanelMenu-options[data-index="1"]').addClass('selected');
+
 	$('.panelDisplay .panEdit-panel').remove();
 	const panEditEl = `<div id="panEdit-panel" class="panEdit-panel"></div>`
 	$('.panelDisplay').append(panEditEl);
 
 	selectedChartTypeIndex = -1;
-	selectedDataSourceTypeIndex = -1;
+	selectedDataSourceTypeIndex = 1;
 	selectedLogLinesViewTypeIndex = -1;
 
 	let dataSourceTypeMenuItems = $('.editPanelMenu-dataSource .editPanelMenu-options');
@@ -1267,6 +1275,8 @@ function resetEditPanel() {
 			return;
 		}
 	})
+	refreshDataSourceMenuOptions();
+	handleSourceDropDownClick();
 }
 
 function getMetricsQData() {
@@ -1312,6 +1322,8 @@ async function runQueryBtnHandler() {
 	$('.panelDisplay #corner-popup').hide();
 	$('.panelDisplay #panelLogResultsGrid').hide();
 	$('.panelDisplay .big-number-display-container').hide();
+	selectedDataSourceTypeIndex = 1;
+	refreshDataSourceMenuOptions();
 
 	// runs the query according to the query type selected and irrespective of chart type
 	if (currentPanel.queryType == 'metrics'){

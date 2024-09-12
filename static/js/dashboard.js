@@ -1069,7 +1069,7 @@ function addPanel(panelToDuplicate) {
     handleDrag(idpanel);
     handleResize(idpanel);
     $(`#panel${idpanel}`).get(0).scrollIntoView({ behavior: 'smooth' });
-
+    resetEditPanel();
 }
 
 function resetPanelContainerHeight() {
